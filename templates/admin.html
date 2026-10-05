@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Moderation Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; line-height: 1.6; }
+        header { background: #263238; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.25rem; }
+        header a { color: #fff; text-decoration: none; background: #37474f; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.85rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        h2 { color: #263238; margin-bottom: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { background: #37474f; color: #fff; font-weight: 600; }
+        tr:hover { background: #f9f9f9; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-secondary { background: #eceff1; color: #546e7a; }
+        .btn { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-warning { background: #ffa000; color: #fff; }
+        .btn-danger { background: #d32f2f; color: #fff; }
+        .reason-input { padding: 0.3rem; font-size: 0.8rem; border: 1px solid #ccc; border-radius: 3px; margin-right: 5px; width: 130px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Kudos Admin Portal</h1>
+        <a href="/">Back to Dashboard</a>
+    </header>
+
+    <div class="container">
+        <h2>Content Moderation Dashboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>From ➔ To</th>
+                    <th>Message</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for k in kudos %}
+                <tr>
+                    <td>{{ k.id }}</td>
+                    <td>{{ k.sender.name }} ➔ {{ k.recipient.name }}</td>
+                    <td>{{ k.message }}</td>
+                    <td><span class="badge" style="background: #e0f2f1; color: #00796b;">{{ k.category }}</span></td>
+                    <td>
+                        {% if k.is_visible %}
+                            <span class="badge badge-success">Visible</span>
+                        {% else %}
+                            <span class="badge badge-secondary" title="Reason: {{ k.reason_for_moderation }}">Hidden</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="/admin/moderate/{{ k.id }}" method="POST" style="display: inline-flex; align-items: center; gap: 4px;">
+                            <input type="hidden" name="action" value="toggle">
+                            {% if k.is_visible %}
+                                <input type="text" name="reason" class="reason-input" placeholder="Reason to hide" required>
+                                <button type="submit" class="btn btn-warning">Hide</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-warning">Unhide</button>
+                            {% endif %}
+                        </form>
+                        <form action="/admin/moderate/{{ k.id }}" method="POST" style="display: inline-block; margin-left: 5px;">
+                            <input type="hidden" name="action" value="delete">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

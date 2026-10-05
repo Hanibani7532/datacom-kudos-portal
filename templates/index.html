@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Datacom Kudos Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #eef2f1; color: #333; line-height: 1.6; }
+        header { background: #004d40; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.25rem; font-weight: bold; }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        .avatar { width: 35px; height: 35px; background: #00796b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .admin-link { color: #fff; text-decoration: none; background: #00796b; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; }
+        
+        .stats-strip { max-width: 1200px; margin: 1.5rem auto 0; padding: 0 1rem; display: flex; gap: 1rem; }
+        .stat-card { background: #fff; flex: 1; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card h4 { font-size: 0.85rem; color: #666; text-transform: uppercase; }
+        .stat-card p { font-size: 1.5rem; font-weight: bold; color: #004d40; margin-top: 0.25rem; }
+
+        .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; display: flex; gap: 2rem; flex-wrap: wrap; }
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 1.5rem; }
+        
+        .left-col { flex: 1; min-width: 320px; }
+        .right-col { flex: 1.5; min-width: 350px; }
+
+        h2 { margin-bottom: 1rem; color: #004d40; font-size: 1.2rem; border-bottom: 2px solid #e0f2f1; padding-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: #555; font-size: 0.9rem; }
+        select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        textarea:focus, select:focus { border-color: #00796b; outline: none; box-shadow: 0 0 5px rgba(0,121,107,0.3); }
+        
+        .char-counter { font-size: 0.8rem; text-align: right; margin-top: 0.25rem; color: #666; }
+        .char-warning { color: #d97706; font-weight: bold; }
+
+        button { background: #00796b; color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 1rem; cursor: pointer; width: 100%; transition: background 0.3s; font-weight: bold; }
+        button:hover { background: #004d40; }
+
+        .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .filter-btn { padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #00796b; background: #fff; color: #00796b; text-decoration: none; font-size: 0.85rem; font-weight: 600; text-align: center; flex: 1; }
+        .filter-btn.active { background: #00796b; color: #fff; }
+
+        .kudos-card { background: #fff; border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border-left: 4px solid #00796b; }
+        .kudos-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+        .user-flow { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; color: #004d40; }
+        .mini-avatar { width: 30px; height: 30px; background: #e0f2f1; color: #004d40; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+        .badge { background: #e0f2f1; color: #00796b; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .kudos-body { font-size: 0.95rem; color: #444; margin-bottom: 0.75rem; }
+        .kudos-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #888; border-top: 1px solid #f1f1f1; padding-top: 0.5rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Datacom Kudos Portal</div>
+        <div class="user-menu">
+            <a href="/admin" class="admin-link">Admin Panel</a>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="avatar">SJ</div>
+                <span style="font-size: 0.9rem; font-weight: 600;">Sarah Jenkins</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+        <div class="stat-card">
+            <h4>Received (You)</h4>
+            <p>{{ received_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Given (You)</h4>
+            <p>{{ given_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Team Total This Week</h4>
+            <p>{{ total_week }}</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Give Kudos Form (Left Column) -->
+        <div class="card left-col">
+            <h2>Give Kudos</h2>
+            <form action="/api/kudos" method="POST" id="kudosForm">
+                <input type="hidden" name="sender_id" value="1">
+                <div class="form-group">
+                    <label>Select Colleague</label>
+                    <select name="recipient_id" required>
+                        <option value="">Choose colleague...</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.name }} ({{ user.team }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category / Badge</label>
+                    <select name="category">
+                        <option value="🌟 Great work">🌟 Great work</option>
+                        <option value="🤝 Teamwork">🤝 Teamwork</option>
+                        <option value="💡 Innovation">💡 Innovation</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Appreciation Message</label>
+                    <textarea name="message" id="msgBox" rows="4" maxlength="500" placeholder="Write appreciation..." required oninput="updateCounter(this)"></textarea>
+                    <div class="char-counter" id="counterText">0 / 500 characters</div>
+                </div>
+                <button type="submit" id="submitBtn">Send Kudos</button>
+            </form>
+        </div>
+
+        <!-- Public Feed (Right Column) -->
+        <div class="card right-col">
+            <h2>Public Kudos Feed</h2>
+            <div class="filter-tabs">
+                <a href="/?filter=all" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">All Feed</a>
+                <a href="/?filter=received" class="filter-btn {% if current_filter == 'received' %}active{% endif %}">Received By Me</a>
+                <a href="/?filter=given" class="filter-btn {% if current_filter == 'given' %}active{% endif %}">Given By Me</a>
+            </div>
+
+            {% for k in kudos %}
+                <div class="kudos-card">
+                    <div class="kudos-header">
+                        <div class="user-flow">
+                            <div class="mini-avatar">{{ k.sender.name[:2].upper() }}</div>
+                            <span>{{ k.sender.name }}</span> ➔ 
+                            <div class="mini-avatar">{{ k.recipient.name[:2].upper() }}</div>
+                            <span>{{ k.recipient.name }}</span>
+                        </div>
+                        <span class="badge">{{ k.category }}</span>
+                    </div>
+                    <div class="kudos-body">{{ k.message }}</div>
+                    <div class="kudos-footer">
+                        <span>{{ k.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: #666; font-style: italic;">
+                    ✨ No kudos yet. Be the first to send one!
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function updateCounter(el) {
+            const len = el.value.length;
+            const counter = document.getElementById('counterText');
+            counter.innerText = len + " / 500 characters";
+            if(len > 400) {
+                counter.className = "char-counter char-warning";
+            } else {
+                counter.className = "char-counter";
+            }
+        }
+
+        document.getElementById('kudosForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+        });
+    </script>
+</body>
+</html>
